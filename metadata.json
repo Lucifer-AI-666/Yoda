@@ -1,0 +1,5 @@
+{
+  "name": "Tauros Sentinel",
+  "description": "A comprehensive cybersecurity analysis dashboard powered by Gemini. Features URL scanning, APK heuristic analysis, and AI-driven threat intelligence.",
+  "requestFramePermissions": []
+}
