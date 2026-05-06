@@ -115,3 +115,49 @@ export const getThreatIntelChat = async (history: {role: string, parts: {text: s
   const result = await chat.sendMessage({ message });
   return result.text;
 };
+
+export const analyzeSystemEvent = async (eventDescription: string): Promise<{
+  type: 'INFO' | 'WARNING' | 'CRITICAL' | 'MALWARE_DETECTED' | 'TASK_EMBEDDED',
+  actionTaken: string,
+  reasoning: string
+}> => {
+  try {
+    const prompt = `
+      As an autonomous security agent, analyze the following system event:
+      "${eventDescription}"
+      
+      Determine if this is a threat. 
+      Return a JSON object with:
+      - type: One of ['INFO', 'WARNING', 'CRITICAL', 'MALWARE_DETECTED', 'TASK_EMBEDDED']
+      - actionTaken: A brief description of what an automated antivirus would do.
+      - reasoning: Your technical reasoning.
+    `;
+
+    const response = await ai.models.generateContent({
+      model: BASE_MODEL,
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            type: { type: Type.STRING, enum: ['INFO', 'WARNING', 'CRITICAL', 'MALWARE_DETECTED', 'TASK_EMBEDDED'] },
+            actionTaken: { type: Type.STRING },
+            reasoning: { type: Type.STRING }
+          },
+          required: ["type", "actionTaken", "reasoning"]
+        }
+      }
+    });
+
+    const text = response.text;
+    if (!text) throw new Error("No response");
+    return JSON.parse(text);
+  } catch (error) {
+    return {
+      type: 'INFO',
+      actionTaken: 'Monitoring continued.',
+      reasoning: 'Event analyzed as non-threatening or analysis failed.'
+    };
+  }
+};

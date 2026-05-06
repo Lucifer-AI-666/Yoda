@@ -1,14 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LayoutDashboard, Globe, Shield, MessageSquare, Terminal, Menu, X } from 'lucide-react';
 import { ViewState } from './types';
-import Dashboard from './components/Dashboard';
+import Dashboard from './Dashboard';
 import UrlScanner from './components/UrlScanner';
 import ApkInspector from './components/ApkInspector';
 import ThreatIntelChat from './components/ThreatIntelChat';
+import { sentinel } from './services/SentinelService';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewState>(ViewState.DASHBOARD);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    // Start the sentinel agent on app load
+    sentinel.start();
+    return () => sentinel.stop();
+  }, []);
 
   const renderContent = () => {
     switch (currentView) {

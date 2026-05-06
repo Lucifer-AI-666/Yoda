@@ -3,11 +3,20 @@ import { FileCode, AlertTriangle, ShieldAlert, Terminal, Eye, Lock, Upload, File
 import { analyzeApkManifest } from '../services/geminiService';
 import { ApkAnalysisResult } from '../types';
 
+interface ApkMetadata {
+  package: string;
+  versionName: string;
+  versionCode: string;
+  minSdkVersion: string;
+  targetSdkVersion: string;
+}
+
 const ApkInspector: React.FC = () => {
   const [manifestText, setManifestText] = useState('');
   const [loading, setLoading] = useState(false);
   const [parsing, setParsing] = useState(false);
   const [result, setResult] = useState<ApkAnalysisResult | null>(null);
+  const [metadata, setMetadata] = useState<ApkMetadata | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAnalyze = async () => {
@@ -34,9 +43,11 @@ const ApkInspector: React.FC = () => {
       const res = await parser.parse();
 
       let output = `=== APK ANALYSIS REPORT ===\n`;
-      output += `Package: ${res.package}\n`;
-      output += `Version Name: ${res.versionName}\n`;
-      output += `Version Code: ${res.versionCode}\n\n`;
+      output += `Package: ${res.package || 'N/A'}\n`;
+      output += `Version Name: ${res.versionName || 'N/A'}\n`;
+      output += `Version Code: ${res.versionCode || 'N/A'}\n`;
+      output += `Min SDK: ${res.minSdkVersion || 'N/A'}\n`;
+      output += `Target SDK: ${res.targetSdkVersion || 'N/A'}\n\n`;
 
       output += `[PERMISSIONS]\n`;
       if (res.usesPermissions && Array.isArray(res.usesPermissions)) {
@@ -68,6 +79,14 @@ const ApkInspector: React.FC = () => {
         }
       }
 
+      setMetadata({
+        package: res.package || 'N/A',
+        versionName: res.versionName || 'N/A',
+        versionCode: res.versionCode?.toString() || 'N/A',
+        minSdkVersion: res.minSdkVersion || 'N/A',
+        targetSdkVersion: res.targetSdkVersion || 'N/A'
+      });
+
       setManifestText(output);
     } catch (error) {
       console.error("APK Parsing Error:", error);
@@ -98,7 +117,7 @@ const ApkInspector: React.FC = () => {
         <div>
           <h2 className="text-2xl font-bold text-white mb-2">APK Forensics</h2>
           <p className="text-slate-400 text-sm">
-            Upload an APK file or paste manifest data to analyze structural risks.
+            Upload an APK file or paste manifest XML data to analyze structural risks.
           </p>
         </div>
 
@@ -152,7 +171,11 @@ const ApkInspector: React.FC = () => {
             </span>
             {manifestText && (
               <button 
-                onClick={() => setManifestText('')}
+                onClick={() => {
+                  setManifestText('');
+                  setMetadata(null);
+                  setResult(null);
+                }}
                 className="text-[10px] text-slate-500 hover:text-red-400 flex items-center gap-1 uppercase tracking-wider"
               >
                 <RefreshCw size={10} /> Clear
@@ -161,8 +184,7 @@ const ApkInspector: React.FC = () => {
           </div>
           <textarea
             className="w-full h-96 lg:h-full bg-slate-900/50 border border-slate-700 rounded-xl pt-12 p-4 font-mono text-xs text-slate-300 focus:outline-none focus:border-cyan-500 resize-none custom-scrollbar leading-relaxed"
-            placeholder={`Waiting for input...
-Upload an APK or paste <manifest> XML here.`}
+            placeholder="Upload an APK or paste manifest XML here (e.g., <manifest ...> ... </manifest>)"
             value={manifestText}
             onChange={(e) => setManifestText(e.target.value)}
           />
@@ -187,6 +209,62 @@ Upload an APK or paste <manifest> XML here.`}
       </div>
 
       <div className="space-y-6">
+        {metadata && (
+          <div className="glass-panel p-6 rounded-xl border border-cyan-500/20 animate-fade-in">
+            <h3 className="text-white font-semibold flex items-center gap-2 mb-4">
+              <FileIcon className="text-cyan-400" size={18} />
+              APK Metadata
+            </h3>
+            <div className="grid grid-cols-1 gap-6">
+              {/* Package Info */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-cyan-400 border-b border-cyan-900/30 pb-2">
+                  <FileIcon size={16} />
+                  <span className="text-xs font-bold uppercase tracking-widest">Package Identity</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Package Name</p>
+                    <p className="text-sm font-mono text-cyan-100 break-all">{metadata.package}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Version</p>
+                    <p className="text-sm font-mono text-white">{metadata.versionName} ({metadata.versionCode})</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* SDK Requirements */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-amber-400 border-b border-amber-900/30 pb-2">
+                  <ShieldAlert size={16} />
+                  <span className="text-xs font-bold uppercase tracking-widest">SDK Requirements</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Minimum SDK Version</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-lg font-mono text-white">{metadata.minSdkVersion}</p>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
+                        API Level
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Target SDK Version</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-lg font-mono text-white">{metadata.targetSdkVersion}</p>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
+                        API Level
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {result ? (
           <div className="animate-fade-in space-y-6">
             {/* Header Card */}
@@ -243,12 +321,20 @@ Upload an APK or paste <manifest> XML here.`}
               </div>
             </div>
           </div>
-        ) : (
+        ) : !metadata ? (
           <div className="h-full flex flex-col items-center justify-center text-slate-600 glass-panel rounded-xl border-dashed border-2 border-slate-800 p-12">
             <FileCode size={64} className="mb-4 opacity-50" />
-            <p className="text-center font-medium text-lg">Awaiting Manifest Data</p>
+            <p className="text-center font-medium text-lg">Awaiting APK Upload</p>
             <p className="text-center text-sm mt-2 max-w-xs text-slate-500">
-              Upload an APK file or paste the XML manifest manually to begin the AI security assessment.
+              Upload an APK file to extract its manifest and begin the AI security assessment.
+            </p>
+          </div>
+        ) : (
+          <div className="h-full flex flex-col items-center justify-center text-slate-600 glass-panel rounded-xl border-dashed border-2 border-slate-800 p-12">
+            <Loader2 size={48} className="mb-4 opacity-50 animate-spin text-cyan-500" />
+            <p className="text-center font-medium text-lg text-slate-400">Ready for Analysis</p>
+            <p className="text-center text-sm mt-2 max-w-xs text-slate-500">
+              Click "Analyze Data" to start the deep security scan on the extracted manifest.
             </p>
           </div>
         )}
