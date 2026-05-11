@@ -5,7 +5,8 @@ export enum ViewState {
   URL_SCANNER = 'URL_SCANNER',
   APK_INSPECTOR = 'APK_INSPECTOR',
   THREAT_INTEL = 'THREAT_INTEL',
-  NETWORK_MONITOR = 'NETWORK_MONITOR'
+  NETWORK_MONITOR = 'NETWORK_MONITOR',
+  IFTTT_DEFENSE = 'IFTTT_DEFENSE'
 }
 
 export interface UrlScanResult {
@@ -56,4 +57,58 @@ export enum AgentStatus {
   ANALYZING = 'ANALYZING',
   THREAT_MITIGATED = 'THREAT_MITIGATED',
   OFFLINE = 'OFFLINE'
+}
+
+export type OAuthRisk = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+export type OAuthStatus = 'ACTIVE' | 'REVOKED' | 'PENDING_REVOCATION';
+
+export interface OAuthApp {
+  id: string;
+  name: string;
+  vendor: string;
+  scopes: string[];
+  connectedUser: string;
+  connectedSince: string;
+  lastActivity: string;
+  risk: OAuthRisk;
+  status: OAuthStatus;
+  isBlocklisted: boolean;
+}
+
+export interface ForwardingRule {
+  id: string;
+  user: string;
+  sourceMailbox: string;
+  destination: string;
+  destinationDomain: string;
+  createdAt: string;
+  isExternal: boolean;
+  isBlocked: boolean;
+  triggeredBy: 'MANUAL' | 'IFTTT' | 'RULE' | 'API';
+}
+
+export interface DlpRule {
+  id: string;
+  name: string;
+  classification: 'CONFIDENTIAL' | 'INTERNAL' | 'PUBLIC';
+  action: 'BLOCK' | 'ALERT' | 'QUARANTINE';
+  targetPaths: string[];
+  status: 'ACTIVE' | 'DISABLED';
+  violationsToday: number;
+}
+
+export interface BlockedDomain {
+  domain: string;
+  category: 'IFTTT' | 'AUTOMATION' | 'PERSONAL_CLOUD' | 'C2';
+  blockedAt: string;
+  blockType: 'FIREWALL' | 'DNS' | 'PROXY';
+  requestsBlocked: number;
+}
+
+export interface MfaStatus {
+  service: string;
+  enforced: boolean;
+  usersCompliant: number;
+  usersTotal: number;
+  lastAudit: string;
 }
