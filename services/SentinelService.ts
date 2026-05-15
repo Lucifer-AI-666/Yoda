@@ -52,7 +52,17 @@ class SentinelService {
       "High CPU usage detected in background task 'SystemUpdate.exe'",
       "Multiple failed login attempts detected on SSH port 22",
       "Hidden task 'CleanUp' scheduled to run at 3:00 AM daily",
-      "New browser extension 'AdBlocker Pro' installed with permission to read all site data"
+      "New browser extension 'AdBlocker Pro' installed with permission to read all site data",
+      // IFTTT / Shadow IT specific events
+      "OAuth token granted to 'IFTTT' app with scopes: mail.read, files.readwrite by user mario.rossi@azienda.it",
+      "Outbound HTTPS request to maker.ifttt.com/trigger/email_forward/with/key/abc123 detected",
+      "Email forwarding rule created: mario.rossi@azienda.it -> mario.rossi.personal@gmail.com via IFTTT Applet",
+      "File 'Contratto_NDA_2026.docx' (CONFIDENTIAL) copied to ~/Dropbox/Personal/ — DLP rule triggered",
+      "Zapier webhook POST to hooks.zapier.com/catch/8821/xyz detected from workstation WS-044",
+      "Power Automate flow (personal tenant) triggered: SharePoint file exported to personal OneDrive",
+      "DNS query for connect.ifttt.com blocked by enterprise DNS filter — source: 192.168.1.87",
+      "New OAuth app 'Make (Integromat)' requesting files.readwrite.all scope on user account",
+      "Bulk email export (>500 messages) initiated via IMAP from external IP 203.0.113.45",
     ];
 
     const randomEvent = events[Math.floor(Math.random() * events.length)];

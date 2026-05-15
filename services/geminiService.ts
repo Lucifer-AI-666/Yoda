@@ -116,6 +116,34 @@ export const getThreatIntelChat = async (history: {role: string, parts: {text: s
   return result.text;
 };
 
+export const analyzeOAuthApp = async (appName: string, scopes: string[], vendor: string): Promise<string> => {
+  try {
+    const prompt = `
+      You are a corporate security analyst. Evaluate the following third-party OAuth application connected to a company's cloud tenant.
+
+      App Name: ${appName}
+      Vendor: ${vendor}
+      Requested OAuth Scopes: ${scopes.join(', ')}
+
+      Analyze:
+      1. Which scopes are dangerous for a corporate environment and why.
+      2. Realistic data exfiltration or C2 abuse scenarios specific to this app (e.g., IFTTT forwarding emails, Zapier syncing files).
+      3. Recommended immediate action (revoke, restrict, or monitor).
+
+      Be concise, technical, and direct. Max 3 sentences.
+    `;
+
+    const response = await ai.models.generateContent({
+      model: BASE_MODEL,
+      contents: prompt,
+    });
+
+    return response.text || "No analysis available.";
+  } catch (error) {
+    return "Analysis unavailable. Check API key or network connection.";
+  }
+};
+
 export const analyzeSystemEvent = async (eventDescription: string): Promise<{
   type: 'INFO' | 'WARNING' | 'CRITICAL' | 'MALWARE_DETECTED' | 'TASK_EMBEDDED',
   actionTaken: string,
