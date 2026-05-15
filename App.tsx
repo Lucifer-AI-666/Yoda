@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Globe, Shield, MessageSquare, Terminal, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Globe, Shield, MessageSquare, Terminal, Menu, X, Wifi } from 'lucide-react';
 import { ViewState } from './types';
 import Dashboard from './Dashboard';
 import UrlScanner from './components/UrlScanner';
 import ApkInspector from './components/ApkInspector';
 import ThreatIntelChat from './components/ThreatIntelChat';
+import NetworkMonitor from './components/NetworkMonitor';
 import { sentinel } from './services/SentinelService';
 
 const App: React.FC = () => {
@@ -23,6 +24,7 @@ const App: React.FC = () => {
       case ViewState.URL_SCANNER: return <UrlScanner />;
       case ViewState.APK_INSPECTOR: return <ApkInspector />;
       case ViewState.THREAT_INTEL: return <ThreatIntelChat />;
+      case ViewState.NETWORK_MONITOR: return <NetworkMonitor />;
       default: return <Dashboard />;
     }
   };
@@ -79,6 +81,7 @@ const App: React.FC = () => {
               <NavItem view={ViewState.URL_SCANNER} icon={<Globe size={20} />} label="URL Scanner" />
               <NavItem view={ViewState.APK_INSPECTOR} icon={<Shield size={20} />} label="APK Forensics" />
               <NavItem view={ViewState.THREAT_INTEL} icon={<MessageSquare size={20} />} label="Threat Intel AI" />
+              <NavItem view={ViewState.NETWORK_MONITOR} icon={<Wifi size={20} />} label="Network Monitor" />
             </nav>
 
             <div className="mt-auto pt-6 border-t border-slate-800">
@@ -105,12 +108,14 @@ const App: React.FC = () => {
                   {currentView === ViewState.URL_SCANNER && 'URL Analysis'}
                   {currentView === ViewState.APK_INSPECTOR && 'APK Inspector'}
                   {currentView === ViewState.THREAT_INTEL && 'Threat Intelligence'}
+                  {currentView === ViewState.NETWORK_MONITOR && 'Network Monitor'}
                 </h2>
                 <p className="text-slate-400 text-sm">
                   {currentView === ViewState.DASHBOARD && 'Real-time security monitoring active.'}
                   {currentView === ViewState.URL_SCANNER && 'Deep scan and parameter extraction.'}
                   {currentView === ViewState.APK_INSPECTOR && 'Static analysis of Android packages.'}
                   {currentView === ViewState.THREAT_INTEL && 'Consult with the Neural Net.'}
+                  {currentView === ViewState.NETWORK_MONITOR && 'Live packet inspection and firewall controls.'}
                 </p>
               </div>
               <div className="hidden md:block text-xs font-mono text-slate-500">
